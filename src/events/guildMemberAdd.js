@@ -101,6 +101,24 @@ export default {
                 }
             }
         }
+
+        try {
+            const me = guild.members.me;
+            if (me?.permissions.has(PermissionFlagsBits.ManageNicknames) && member.manageable) {
+                const prefix = 'MYM ';
+                const maxNickLength = 32;
+                const desiredNick = `${prefix}${member.user.username}`;
+                const newNick = desiredNick.length > maxNickLength
+                    ? `${prefix}${member.user.username.slice(0, maxNickLength - prefix.length)}`
+                    : desiredNick;
+
+                if (member.nickname !== newNick) {
+                    await member.edit({ nick: newNick }, 'Automatic welcome nickname assignment');
+                }
+            }
+        } catch (error) {
+            logger.debug('Failed to set automatic welcome nickname:', error);
+        }
         
         if (config?.verification?.enabled || config?.verification?.autoVerify?.enabled) {
             await handleVerification(member, guild, config.verification, member.client);
